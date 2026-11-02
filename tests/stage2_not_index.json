@@ -1,0 +1,6 @@
+{
+    "package": "curl",
+    "repository": "https://dl-cdn.alpinelinux.org/alpine/",
+    "test_mode": false,
+    "output_image": "graph.png"
+}

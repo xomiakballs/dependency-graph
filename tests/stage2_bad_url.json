@@ -1,0 +1,6 @@
+{
+    "package": "curl",
+    "repository": "ne-adres",
+    "test_mode": false,
+    "output_image": "graph.png"
+}

@@ -3,6 +3,8 @@
 import json
 import sys
 
+import apk
+
 DEFAULT_CONFIG = "config.json"
 REQUIRED_KEYS = ["package", "repository", "test_mode", "output_image"]
 IMAGE_EXTENSION = ".png"
@@ -53,19 +55,40 @@ def check_config(config):
     return check_values(config)
 
 
+def show_direct_dependencies(config):
+    """Выводит прямые зависимости пакета из репозитория Alpine."""
+    try:
+        packages = apk.load_index(config["repository"])
+    except apk.RepositoryError as error:
+        print("Ошибка:", error)
+        sys.exit(1)
+    name = config["package"]
+    if name not in packages:
+        print("Ошибка: пакет", name, "не найден в репозитории")
+        sys.exit(1)
+    providers = apk.build_providers(packages)
+    dependencies = apk.direct_dependencies(packages, providers, name)
+    print("Прямые зависимости пакета " + name + ":")
+    for dependency in dependencies:
+        print("  " + dependency)
+    if not dependencies:
+        print("  (нет зависимостей)")
+
+
 def main():
-    """Точка входа: читает конфиг, печатает параметры и ошибки."""
+    """Точка входа: читает конфиг и выводит прямые зависимости пакета."""
     args = sys.argv[1:]
     path = args[0] if args else DEFAULT_CONFIG
     config = load_config(path)
     errors = check_config(config)
-    if isinstance(config, dict):
-        for key, value in config.items():
-            print(key, "=", value)
     for error in errors:
         print("Ошибка:", error)
     if errors:
         sys.exit(1)
+    if config["test_mode"]:
+        print("Тестовый режим будет реализован на Этапе 3")
+        return
+    show_direct_dependencies(config)
 
 
 if __name__ == "__main__":

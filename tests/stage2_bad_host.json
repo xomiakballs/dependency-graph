@@ -1,0 +1,6 @@
+{
+    "package": "curl",
+    "repository": "https://net-takogo-sajta.invalid/APKINDEX.tar.gz",
+    "test_mode": false,
+    "output_image": "graph.png"
+}
