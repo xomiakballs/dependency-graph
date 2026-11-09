@@ -5,6 +5,7 @@ import sys
 
 import apk
 import graph
+import visual
 
 DEFAULT_CONFIG = "config.json"
 REQUIRED_KEYS = ["package", "repository", "test_mode", "output_image"]
@@ -82,6 +83,18 @@ def make_apk_source(config):
         packages, providers, name)
 
 
+def draw_graph(dependency_graph, image_path):
+    """Выводит граф на языке Mermaid и сохраняет его картинку в PNG."""
+    mermaid_text = visual.to_mermaid(dependency_graph)
+    print("Граф на языке Mermaid:")
+    print(mermaid_text)
+    try:
+        visual.save_png(mermaid_text, image_path)
+    except (OSError, ValueError) as error:
+        fail("не удалось сохранить изображение графа: " + str(error))
+    print("Изображение графа сохранено в файл " + image_path)
+
+
 def show_graph(config):
     """Строит и выводит полный граф зависимостей пакета."""
     if config["test_mode"]:
@@ -96,10 +109,7 @@ def show_graph(config):
     for package, deps in dependency_graph.items():
         targets = ", ".join(deps) if deps else "(нет зависимостей)"
         print("  " + package + " -> " + targets)
-    order = graph.load_order(dependency_graph, name)
-    print("Порядок загрузки зависимостей:")
-    for number, package in enumerate(order, start=1):
-        print("  " + str(number) + ". " + package)
+    draw_graph(dependency_graph, config["output_image"])
 
 
 def main():
