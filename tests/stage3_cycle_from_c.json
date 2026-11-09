@@ -1,0 +1,6 @@
+{
+    "package": "C",
+    "repository": "tests/repo_cycle.txt",
+    "test_mode": true,
+    "output_image": "graph.png"
+}

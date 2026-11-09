@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 REM Этап 2: прямые зависимости пакета из репозитория Alpine
 cd /d "%~dp0.."
 echo === 1. curl ===

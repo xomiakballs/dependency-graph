@@ -1,0 +1,6 @@
+{
+    "package": "A",
+    "repository": "tests/repo_no_colon.txt",
+    "test_mode": true,
+    "output_image": "graph.png"
+}

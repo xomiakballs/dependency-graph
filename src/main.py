@@ -4,6 +4,7 @@ import json
 import sys
 
 import apk
+import graph
 
 DEFAULT_CONFIG = "config.json"
 REQUIRED_KEYS = ["package", "repository", "test_mode", "output_image"]
@@ -55,28 +56,50 @@ def check_config(config):
     return check_values(config)
 
 
-def show_direct_dependencies(config):
-    """Выводит прямые зависимости пакета из репозитория Alpine."""
+def fail(message):
+    """Печатает сообщение об ошибке и завершает программу."""
+    print("Ошибка:", message)
+    sys.exit(1)
+
+
+def make_test_source(config):
+    """Готовит источник зависимостей из файла тестового репозитория."""
+    try:
+        repo = graph.load_test_repo(config["repository"])
+    except graph.TestRepoError as error:
+        fail(error)
+    return repo, lambda name: repo.get(name, [])
+
+
+def make_apk_source(config):
+    """Готовит источник зависимостей из репозитория Alpine."""
     try:
         packages = apk.load_index(config["repository"])
     except apk.RepositoryError as error:
-        print("Ошибка:", error)
-        sys.exit(1)
-    name = config["package"]
-    if name not in packages:
-        print("Ошибка: пакет", name, "не найден в репозитории")
-        sys.exit(1)
+        fail(error)
     providers = apk.build_providers(packages)
-    dependencies = apk.direct_dependencies(packages, providers, name)
-    print("Прямые зависимости пакета " + name + ":")
-    for dependency in dependencies:
-        print("  " + dependency)
-    if not dependencies:
-        print("  (нет зависимостей)")
+    return packages, lambda name: apk.direct_dependencies(
+        packages, providers, name)
+
+
+def show_graph(config):
+    """Строит и выводит полный граф зависимостей пакета."""
+    if config["test_mode"]:
+        known, get_deps = make_test_source(config)
+    else:
+        known, get_deps = make_apk_source(config)
+    name = config["package"]
+    if name not in known:
+        fail("пакет " + name + " не найден в репозитории")
+    dependency_graph = graph.build_graph(get_deps, name)
+    print("Граф зависимостей пакета " + name + ":")
+    for package, deps in dependency_graph.items():
+        targets = ", ".join(deps) if deps else "(нет зависимостей)"
+        print("  " + package + " -> " + targets)
 
 
 def main():
-    """Точка входа: читает конфиг и выводит прямые зависимости пакета."""
+    """Точка входа: читает конфиг и выводит граф зависимостей пакета."""
     args = sys.argv[1:]
     path = args[0] if args else DEFAULT_CONFIG
     config = load_config(path)
@@ -85,10 +108,7 @@ def main():
         print("Ошибка:", error)
     if errors:
         sys.exit(1)
-    if config["test_mode"]:
-        print("Тестовый режим будет реализован на Этапе 3")
-        return
-    show_direct_dependencies(config)
+    show_graph(config)
 
 
 if __name__ == "__main__":

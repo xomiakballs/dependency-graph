@@ -1,0 +1,6 @@
+{
+    "package": "A",
+    "repository": "tests/repo_simple.txt",
+    "test_mode": true,
+    "output_image": "graph.png"
+}

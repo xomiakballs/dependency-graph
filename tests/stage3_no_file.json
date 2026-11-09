@@ -1,0 +1,6 @@
+{
+    "package": "A",
+    "repository": "tests/net_takogo.txt",
+    "test_mode": true,
+    "output_image": "graph.png"
+}
