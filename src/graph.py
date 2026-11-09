@@ -56,3 +56,20 @@ def load_test_repo(path):
         name, deps = parse_test_line(line, number)
         graph[name] = deps
     return graph
+
+
+def visit(graph, name, seen, order):
+    """Добавляет в order сначала зависимости пакета name, потом его самого."""
+    if name in seen:
+        return
+    seen.add(name)
+    for dep in graph.get(name, []):
+        visit(graph, dep, seen, order)
+    order.append(name)
+
+
+def load_order(graph, start):
+    """Возвращает порядок загрузки: зависимости раньше зависящих пакетов."""
+    order = []
+    visit(graph, start, set(), order)
+    return order

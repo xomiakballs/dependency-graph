@@ -96,6 +96,10 @@ def show_graph(config):
     for package, deps in dependency_graph.items():
         targets = ", ".join(deps) if deps else "(нет зависимостей)"
         print("  " + package + " -> " + targets)
+    order = graph.load_order(dependency_graph, name)
+    print("Порядок загрузки зависимостей:")
+    for number, package in enumerate(order, start=1):
+        print("  " + str(number) + ". " + package)
 
 
 def main():
